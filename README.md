@@ -229,14 +229,19 @@ REQUEST V 600
 After completing the lab, answer these questions:
 
 1. **Fragmentation Analysis:** In the basic example, what is the external fragmentation percentage? Explain why free memory becomes fragmented.
+- 25%. Free memory becomes fragmented because First-Fit keeps splitting blocks, leaving small leftover pieces scattered in between allocated blocks. These pieces are too small to be useful, even though total free memory is large.
 
-2. **First-Fit Efficiency:** Why does P4 use the block left by P1 even though it's larger than needed? What happens to the unused portion?
+3. **First-Fit Efficiency:** Why does P4 use the block left by P1 even though it's larger than needed? What happens to the unused portion?
+- P4 uses the block left by P1 because First-Fit always chooses the first free block big enough, not the best or smallest fit.The unused portion of that block becomes a new small free block, which increases fragmentation.
 
-3. **Allocation Patterns:** Compare workload1.txt (many small processes) with workload2.txt (few large processes). Which creates more fragmentation? Why?
+5. **Allocation Patterns:** Compare workload1.txt (many small processes) with workload2.txt (few large processes). Which creates more fragmentation? Why?
+- workload1.txt (many small requests) and creates more fragmentation. Because it constantly allocates small blocks, frees them, and leaves tiny holes everywhere.
+- workload2.txt (few large requests) less fragmentation. Larger blocks fill memory in bigger chunks, which reduces the number of small leftover pieces.
+6. **Failed Allocations:** Create a scenario where an allocation fails even though the total free memory is larger than the request. Why does this happen?
+- Total free = 100 KB, but it is split into two 50 KB pieces.If a process requests 60 KB, allocation fails even though total free memory > 60, because no single free block is big enough.
 
-4. **Failed Allocations:** Create a scenario where an allocation fails even though the total free memory is larger than the request. Why does this happen?
-
-5. **Algorithm Comparison:** How might Best-Fit allocation handle the basic example differently than First-Fit? Would it reduce fragmentation?
+7. **Algorithm Comparison:** How might Best-Fit allocation handle the basic example differently than First-Fit? Would it reduce fragmentation?
+- First-Fit picks the first block that is big enough. Best-Fit picks the smallest free block that can hold the request, and Best-Fit would choose the tightest block, reducing the leftover free space.
 
 ## What You're Really Learning
 
