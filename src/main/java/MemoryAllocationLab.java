@@ -56,12 +56,61 @@ public class MemoryAllocationLab {
         // Read first line for total memory size
         // Create initial free block: new MemoryBlock(0, totalMemory, null)
         // Read remaining lines in a loop
-        // Parse each line and call allocate() or deallocate()
+        // Parse each line and call allocate() or deallocat // TODO 2: Implement these helper methods
 
+    try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+        String line = br.readLine();
+        if (line == null) {
+            System.out.println("Input file is empty.");
+            return;
+        }
 
-        // TODO 2: Implement these helper methods
+        totalMemory = Integer.parseInt(line.trim());
+        System.out.println("Total Memory: " + totalMemory + " KB");
+        System.out.println("----------------------------------------");
+        System.out.println("\nProcessing requests...\n");
 
+        memory.add(new MemoryBlock(0, totalMemory, null));
+
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) {
+                continue; 
+            }
+
+            String[] parts = line.split("\\s+");
+            String command = parts[0];
+
+            if (command.equalsIgnoreCase("REQUEST")) {
+                if (parts.length < 3) {
+                    System.out.println("Invalid REQUEST line: " + line);
+                    continue;
+                }
+                String processName = parts[1];
+                int size = Integer.parseInt(parts[2]);
+                allocate(processName, size);
+
+            } else if (command.equalsIgnoreCase("RELEASE")) {
+                if (parts.length < 2) {
+                    System.out.println("Invalid RELEASE line: " + line);
+                    continue;
+                }
+                String processName = parts[1];
+                deallocate(processName);
+
+            } else {
+                System.out.println("Unknown command: " + line);
+            }
+        }
+
+    } catch (IOException e) {
+        System.out.println("Error reading file: " + e.getMessage());
+    } catch (NumberFormatException e) {
+        System.out.println("Invalid number format in file: " + e.getMessage());
     }
+}
+    
+
 
     /**
      * TODO 2A: Allocate memory using First-Fit
@@ -79,8 +128,48 @@ public class MemoryAllocationLab {
         // If not found:
         //   - Increment failedAllocations
         //   - Print failure message
+    for (int i = 0; i < memory.size(); i++) {
+        MemoryBlock block = memory.get(i);
 
+        if (block.isFree() && block.size >= size) {
+            int remainingSize = block.size - size;
+
+            block.processName = processName;
+            block.size = size;
+
+            if (remainingSize > 0) {
+                int newStart = block.start + size;
+                MemoryBlock freeBlock = new MemoryBlock(newStart, remainingSize, null);
+                memory.add(i + 1, freeBlock);
+            }
+
+            successfulAllocations++;
+            System.out.println("REQUEST " + processName + " " + size + " KB → SUCCESS");
+            return;
+        }
     }
+
+    failedAllocations++;
+    System.out.println("REQUEST " + processName + " " + size + " KB → FAILED (insufficient memory)");
+}
+// Deallocation
+
+private static void deallocate(String processName) {
+    for (int i = 0; i < memory.size(); i++) {
+        MemoryBlock block = memory.get(i);
+        if (!block.isFree() && block.processName.equals(processName)) {
+            block.processName = null;
+
+            System.out.println("RELEASE " + processName + " → SUCCESS");
+
+           // mergeAdjacentBlocks();
+
+            return;
+        }
+    }
+
+    System.out.println("RELEASE " + processName + " → FAILED (process not found)");
+}
 
     public static void displayStatistics() {
         System.out.println("\n========================================");
